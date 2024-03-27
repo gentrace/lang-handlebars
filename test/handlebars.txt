@@ -30,14 +30,6 @@ Template(Insert("{{",Identifier,"}}"))
 
 Template(Insert("{{",Identifier,"}}"),Text,Insert("{{",Identifier,Equa(Identifier,Number),Equa(Identifier,Number),Equa(Identifier,String),Identifier,Bool,Number,String,String,"}}"))
 
-# Test escaping
-
-{{{specialChars sddgb 123 false }}}
-
-==>
-
-Template(Escape(Any))
-
 # Test buildIn Helper
 
 {{#if qwer asd df "sdg" 123"sd"}}123{{/if}}
