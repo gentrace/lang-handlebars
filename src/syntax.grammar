@@ -14,6 +14,8 @@ Insert { "{{" (space* (Identifier | BIHelper | Number | Bool | String | Equa | S
 
 Escape { "{{{" Any "}}}" | "{{{{{" "{"* Any "}"* "}}}}}"}
 
+Escape { "{{{" (space* (Identifier | BIHelper | Number | Bool | String | Equa | Subexp | "|" | "^" | "~"))*  space* "}}}" | "{{{{{" "{"* Any "}"* "}}}}}"}
+
 RawOpen { "{{{{" Any "}}}}" }
 
 RawClose { "{{{{/" Any "}}}}" }
