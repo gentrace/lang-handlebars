@@ -12,5 +12,6 @@ export const Highlight = styleTags({
     Number: tags.number,
     String: tags.string,
     Identifier: tags.variableName,
+    "[ ]": tags.bracket,
     "~ @": tags.atom,
 });
