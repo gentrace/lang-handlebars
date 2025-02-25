@@ -56,7 +56,7 @@ Subexp { "(" (space* (Identifier | Number | Bool | String | Equa | Subexp | "|")
 
   identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] | "../" | "@" }
 
-  word { identifierChar (identifierChar | @digit | "." | "#" | "-" | "_")* }
+  word { identifierChar (identifierChar | @digit | "." | "#" | "-" | "_" | "[" | "]")* }
 
   Identifier { word }
 
@@ -87,6 +87,8 @@ Subexp { "(" (space* (Identifier | Number | Bool | String | Equa | Subexp | "|")
   "}}"
   "."
   "~"
+  "["
+  "]"
 }
 
 @external propSource Highlight from "./highlight.js"

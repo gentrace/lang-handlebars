@@ -176,3 +176,11 @@ Template(BlockComment)
 ===>
 
 Template(OnelineComment)
+
+# Test array indexing
+
+{{messages[0].content}} {{users[1]["name"]}} {{items["key"].value}}
+
+===>
+
+Template(Insert("{{",Identifier,"}}"),Text,Insert("{{",Identifier,"}}"),Text,Insert("{{",Identifier,"}}"))
