@@ -1,5 +1,3 @@
-// Very crude grammar for a subset of Twig templating syntax
-
 @top Template { (directive | Text)* }
 
 directive {
@@ -10,18 +8,30 @@ directive {
   OnelineComment
 }
 
-Insert { "{{" (space* (Identifier | BIHelper | Number | Bool | String | Equa | Subexp | "|" | "^" | "~"))*  space* "}}" }
+Insert { "{{" (space* (Expression | "|" | "^" | "~"))*  space* "}}" }
 
-Escape { "{{{" (space* (Identifier | BIHelper | Number | Bool | String | Equa | Subexp | "|" | "^" | "~"))*  space* "}}}" }
+Escape { "{{{" (space* (Expression | "|" | "^" | "~"))*  space* "}}}" }
+
+Expression {
+  PropertyAccess |
+  BracketExpression |
+  Identifier |
+  BIHelper |
+  Number |
+  Bool |
+  String |
+  Equa |
+  Subexp
+}
+
+// Simplified property access
+PropertyAccess { Identifier (DotProperty)+ }
+DotProperty { dot Identifier }
+BracketExpression { Identifier "[" Number "]" }
 
 RawOpen { "{{{{" Any "}}}}" }
-
 RawClose { "{{{{/" Any "}}}}" }
-// @precedence { "/", Any }
-
-// @skip {space} {
 RawBlock { RawOpen (directive | Text)* RawClose }
-// }
 
 @local tokens {
   blockCommentEnd { "--}}" }
@@ -47,29 +57,33 @@ RawBlock { RawOpen (directive | Text)* RawClose }
 
 Bool { @specialize<Identifier, "true" | "false"> }
 Equa { Identifier "=" (Identifier | Number | Bool | String) }
+Subexp { "(" (space* (Expression | "|"))*  space* ")" }
 
-
-Subexp { "(" (space* (Identifier | Number | Bool | String | Equa | Subexp | "|"))*  space* ")" }
 @tokens {
   spaces[@export] { $[\u0009 \u000b\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]+ }
   newline[@export] { $[\r\n\u2028\u2029] }
-
-  identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] | "../" | "@" }
-
-  word { identifierChar (identifierChar | @digit | "." | "#" | "-" | "_" | "[" | "]")* }
-
-  Identifier { word }
+  
+  identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] | "@" }
+  
+  // Just handle all identifiers the same way, including paths
+  // This deliberately includes "../" and "./" as possible identifier patterns
+  Identifier { identifierChar (identifierChar | @digit | "/" | "." | "#" | "-" | "_")* }
 
   BIHelper { ("#"|"/"|"*") Identifier | "else" | "else if" | ">" }
-  // Identifier { "."? "./"? @asciiLetter+ ("." @asciiLetter+)?  }
+  
   Text { ![{] Text? | "{" (@eof | ![{] Text?) }
   hex { @digit | $[a-fA-F] }
 
   Any { (![{|}])+ }
 
   String { ("'" (![\\'] | "\\" _)* "'"?) | ("\"" (![\\"] | "\\" _)* "\""?) }
+  
+  // Use a separate token for the dot in property access to avoid conflicts
+  dot { "." }
+  
   Number {
-    (@digit ("_" | @digit)* ("." ("_" | @digit)*)? | "." @digit ("_" | @digit)*)
+    // Dot in number contexts
+    (@digit ("_" | @digit)* (dot ("_" | @digit)*)? | dot @digit ("_" | @digit)*)
       (("e" | "E") ("+" | "-")? ("_" | @digit)+)? |
     @digit ("_" | @digit)* "n" |
     "0x" (hex | "_")+ "n"? |
@@ -78,14 +92,17 @@ Subexp { "(" (space* (Identifier | Number | Bool | String | Equa | Subexp | "|")
   }
 
   space { @whitespace+ }
-  @precedence { space BIHelper Identifier }
-  @precedence { spaces, newline, Identifier}
-  @precedence { spaces, newline, Text}
+  
+  @precedence { Number, dot }
+  @precedence { dot, Identifier }
+  @precedence { space, BIHelper, Identifier }
+  @precedence { spaces, newline, Identifier }
+  @precedence { spaces, newline, Text }
   @precedence { Any, spaces, newline }
   @precedence { spaces, newline, space }
+  
   "{{"
   "}}"
-  "."
   "~"
   "["
   "]"
