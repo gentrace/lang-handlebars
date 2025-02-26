@@ -1,6 +1,6 @@
 {
   "name": "@gentrace/codemirror-lang-handlebars",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.4",
   "description": "Handlebars language support for CodeMirror6",
   "scripts": {
     "test": "LOG=parse mocha test/test.js",
